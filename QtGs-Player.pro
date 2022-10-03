@@ -1,6 +1,10 @@
 QT += quick
+QT += core
+QT += dbus
+QT += network
 
 CONFIG += c++11
+CONFIG += link_pkgconfig
 
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
@@ -28,3 +32,21 @@ QML_DESIGNER_IMPORT_PATH =
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+
+# files needed for gstreamer
+INCLUDEPATH += /usr/include/gstreamer-1.0
+INCLUDEPATH += /usr/include/glib-2.0
+INCLUDEPATH += /usr/lib/glib-2.0/include
+INCLUDEPATH += /usr/lib/gstreamer-1.0
+
+# external libraries
+PKGCONFIG += gstreamer-1.0
+PKGCONFIG += gstreamer-video-1.0
+PKGCONFIG += gstreamer-pbutils-1.0
+
+
+HEADERS += ./gstiface/gstiface.h
+
+
+SOURCES	+= ./gstiface/gstiface.cpp

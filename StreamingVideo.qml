@@ -44,10 +44,23 @@ Item {
 
         Rectangle {
             height: parent.height
-            width: 2
+            width: 6
             anchors.right: parent.right
             color: "grey"
-            opacity: 0.5
+            radius: 3
+        }
+    }
+
+    Item {
+        id: videoView
+        width: root.width = listSource.width
+        height: root.height
+        anchors.right: root.right
+        Connections {
+            target: listSource
+            onCurrentIndexChanged: {
+
+            }
         }
     }
 }
