@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>ScreenMainLv1.qml</file>
+        <file>ScreenMainLv2.qml</file>
+        <file>StreamingVideo.qml</file>
+        <file>USBVideos.qml</file>
+    </qresource>
+</RCC>
