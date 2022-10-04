@@ -2,6 +2,7 @@ QT += quick
 QT += core
 QT += dbus
 QT += network
+QT += multimedia
 
 CONFIG += c++11
 CONFIG += link_pkgconfig
@@ -19,6 +20,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
+        players/CorePlayer.cpp \
+        players/GstBinding.cpp \
         players/videoplayer.cpp
 
 RESOURCES += qml.qrc
@@ -48,6 +51,9 @@ PKGCONFIG += gstreamer-pbutils-1.0
 
 
 HEADERS += ./gstiface/gstiface.h \
+    players/CorePlayer.h \
+    players/GstBinding.h \
+    players/RawPlayer.h \
     players/videoplayer.h
 
 

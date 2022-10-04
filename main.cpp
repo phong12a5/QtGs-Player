@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include <players/videoplayer.h>
+#include <players/RawPlayer.h>
 
 int main(int argc, char *argv[])
 {
@@ -11,6 +12,10 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
+
+    qmlRegisterType<RawPlayer>("RawPlayer",1,0,"RawPlayer");
+
+
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
