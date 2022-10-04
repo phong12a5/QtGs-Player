@@ -18,7 +18,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+        players/videoplayer.cpp
 
 RESOURCES += qml.qrc
 
@@ -46,7 +47,8 @@ PKGCONFIG += gstreamer-video-1.0
 PKGCONFIG += gstreamer-pbutils-1.0
 
 
-HEADERS += ./gstiface/gstiface.h
+HEADERS += ./gstiface/gstiface.h \
+    players/videoplayer.h
 
 
 SOURCES	+= ./gstiface/gstiface.cpp

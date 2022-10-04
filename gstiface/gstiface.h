@@ -31,7 +31,7 @@ DEALINGS IN THE SOFTWARE.
 # include <gst/video/videooverlay.h>
 # include <gst/tag/tag.h>
 
-# include <QWidget>
+//# include <QWidget>
 # include <QString>
 # include <QObject>
 # include <QTimer>
@@ -39,7 +39,10 @@ DEALINGS IN THE SOFTWARE.
 # include <QList>
 # include <QVariant>
 
-# include "./code/streaminfo/streaminfo.h"
+//# include "./code/streaminfo/streaminfo.h"
+
+#define PLAYER_NAME "mbmp_player"
+
 
 //  Enum's local to this program
 namespace MBMP_GI 
@@ -116,7 +119,7 @@ class GST_Interface : public QObject
     void hardwareDecoding(bool);  
     int checkCD(QString); 
     int checkDVD(QString);      
-    void playMedia(WId, QString, int track = 0);
+    void playMedia(/*WId,*/ QString, int track = 0);
     void playPause();
     GstState getState();
     double getVolume();
@@ -159,9 +162,9 @@ class GST_Interface : public QObject
     void playerStop();
     void toggleStreamInfo();
     // passthrough slots
-    inline void cycleAudioStream() {streaminfo->cycleAudioStream();}
-    inline void cycleVideoStream() {streaminfo->cycleVideoStream();}
-    inline void cycleTextStream()  {streaminfo->cycleTextStream();}
+//    inline void cycleAudioStream() {streaminfo->cycleAudioStream();}
+//    inline void cycleVideoStream() {streaminfo->cycleVideoStream();}
+//    inline void cycleTextStream()  {streaminfo->cycleTextStream();}
 
   signals:
     void signalMessage(int, QString = QString());
@@ -173,7 +176,7 @@ class GST_Interface : public QObject
     QTimer* dl_timer;
     QMap<QString, GstElementFactory*> vismap; 
     QMap<QString, int> streammap;
-    StreamInfo* streaminfo;   
+//    StreamInfo* streaminfo;
     QWidget* mainwidget;
     QList<TocEntry> tracklist;
     QMap<QString, QVariant> map_md_cd;

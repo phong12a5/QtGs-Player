@@ -1,5 +1,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+
+#include <players/videoplayer.h>
 
 int main(int argc, char *argv[])
 {
@@ -14,6 +17,10 @@ int main(int argc, char *argv[])
         if (!obj && url == objUrl)
             QCoreApplication::exit(-1);
     }, Qt::QueuedConnection);
+
+    VideoPlayer player;
+    engine.rootContext()->setContextProperty("VideoPlayer", &player);
+
     engine.load(url);
 
     return app.exec();

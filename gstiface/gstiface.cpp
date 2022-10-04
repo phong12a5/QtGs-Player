@@ -26,15 +26,17 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ***********************************************************************/ 
 
-# include "./code/gstiface/gstiface.h"
-# include "./code/playerctl/playerctl.h"  
+# include "./gstiface/gstiface.h"
+//# include "./code/playerctl/playerctl.h"
 
-# include "./code/resource.h"
+//# include "./code/resource.h"
 
 # include <QDebug>
-# include <QWidget>
+//# include <QWidget>
 # include <QTime>
-# include <QMessageBox>
+#include <QFile>
+#include <QTemporaryFile>
+//# include <QMessageBox>
 
 //  Callback Function: Return TRUE if the element is of type defined in data
 static gboolean filter_features (GstPluginFeature *feature, gpointer data)
@@ -92,8 +94,8 @@ GST_Interface::GST_Interface(QObject* parent) : QObject(parent)
   map_md_dvd.clear();       // map containing DVD metadata              
   
   // setup the dialog to display stream info
-  streaminfo = new StreamInfo(this);
-  streaminfo->enableAll(false);
+//  streaminfo = new StreamInfo(this);
+//  streaminfo->enableAll(false);
     
   // initialize gstreamer
   gst_init(NULL, NULL);
@@ -412,7 +414,7 @@ int GST_Interface::checkDVD(QString dev)
 // Pipeline_playbin is reset for each new file.  For CD do the same initially,
 // but then when we want a new track just do a track seek on the running
 // stream.
-void GST_Interface::playMedia(WId winId, QString uri, int track)
+void GST_Interface::playMedia(/*WId winId,*/ QString uri, int track)
 {
   // if we need to seek in a currently playing disk (CD or DVD)
   if (track > 0 ) {
@@ -442,9 +444,17 @@ void GST_Interface::playMedia(WId winId, QString uri, int track)
       else if (uri.startsWith("http://", Qt::CaseInsensitive) || uri.startsWith("ftp://", Qt::CaseInsensitive)) mediatype = MBMP_GI::Url;
         else  mediatype = MBMP_GI::File;
 
+      /* Set flags to show Audio and Video but ignore Subtitles */
+    gint flags;
+    g_object_get (pipeline_playbin, "flags", &flags, NULL);
+    flags |= GST_PLAY_FLAG_VIDEO | GST_PLAY_FLAG_AUDIO;
+    flags &= ~GST_PLAY_FLAG_TEXT;
+    g_object_set (pipeline_playbin, "flags", flags, NULL);
+
+
     // Set the video overlay and allow it to handle navigation events
-    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(pipeline_playbin), winId);
-    gst_video_overlay_handle_events(GST_VIDEO_OVERLAY(pipeline_playbin), TRUE);                
+//    gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(pipeline_playbin), winId);
+//    gst_video_overlay_handle_events(GST_VIDEO_OVERLAY(pipeline_playbin), TRUE);
 
     // Bring the pipeline to paused and see if we have a live stream (for buffering)
     ret = gst_element_set_state(pipeline_playbin, GST_STATE_PAUSED);
@@ -859,15 +869,15 @@ gint64 GST_Interface::queryStreamPosition()
 				switch (new_state) {
 					case GST_STATE_PLAYING:
 						analyzeStream();
-						streaminfo->updateAudioBox(getAudioStreamInfo());
-						streaminfo->updateVideoBox(getVideoStreamInfo());
-						streaminfo->updateSubtitleBox(getTextStreamInfo());
-						streaminfo->setComboBoxes(streammap); 
-						streaminfo->setSubtitleBoxEnabled(checkPlayFlag(GST_PLAY_FLAG_TEXT));
-						streaminfo->enableAll(true);
+//						streaminfo->updateAudioBox(getAudioStreamInfo());
+//						streaminfo->updateVideoBox(getVideoStreamInfo());
+//						streaminfo->updateSubtitleBox(getTextStreamInfo());
+//						streaminfo->setComboBoxes(streammap);
+//						streaminfo->setSubtitleBoxEnabled(checkPlayFlag(GST_PLAY_FLAG_TEXT));
+//						streaminfo->enableAll(true);
 						break;
 					case GST_STATE_PAUSED:
-						streaminfo->enableAll(false);
+//						streaminfo->enableAll(false);
 						break;
 					case GST_STATE_NULL:
 					  opticaldrive.clear();
@@ -879,12 +889,13 @@ gint64 GST_Interface::queryStreamPosition()
 					  dl_timer->stop();
 						break;	
 					default:
-						streaminfo->updateAudioBox(tr("Audio Information"));
-						streaminfo->updateVideoBox(tr("Video Information"));
-						streaminfo->updateSubtitleBox(tr("Subtitle Information"));
-						streammap.clear();
-						streaminfo->setComboBoxes(streammap); 
-						streaminfo->enableAll(false);
+//						streaminfo->updateAudioBox(tr("Audio Information"));
+//						streaminfo->updateVideoBox(tr("Video Information"));
+//						streaminfo->updateSubtitleBox(tr("Subtitle Information"));
+//						streammap.clear();
+//						streaminfo->setComboBoxes(streammap);
+//						streaminfo->enableAll(false);
+                    break;
 				} // state switch
 			} // if           
 			break; }    
@@ -1209,7 +1220,7 @@ void GST_Interface::setAudioStream(const int& stream)
     
   // update the streammap and then the text display boxes
   streammap["current-audio"] = stream;
-  streaminfo->updateAudioBox(getAudioStreamInfo());
+//  streaminfo->updateAudioBox(getAudioStreamInfo());
     
   return;
 } 
@@ -1226,7 +1237,7 @@ void GST_Interface::setVideoStream(const int& stream)
     
   // update the streammap and text display boxes
   streammap["current-video"] = stream;
-  streaminfo->updateVideoBox(getVideoStreamInfo());
+//  streaminfo->updateVideoBox(getVideoStreamInfo());
   
   return;
 } 
@@ -1243,7 +1254,7 @@ void GST_Interface::setTextStream(const int& stream)
   
   // update the streammap and text display boxes
   streammap["current-text"] = stream;
-  streaminfo->updateSubtitleBox(getTextStreamInfo());
+//  streaminfo->updateSubtitleBox(getTextStreamInfo());
   
   return;
 } 
@@ -1302,7 +1313,7 @@ void GST_Interface::playerStop()
 // a QAction in various functions
 void GST_Interface::toggleStreamInfo()
 {
-  streaminfo->isVisible() ? streaminfo->hide() : streaminfo->show();
+//  streaminfo->isVisible() ? streaminfo->hide() : streaminfo->show();
   
   return;
 }
