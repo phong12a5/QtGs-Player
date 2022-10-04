@@ -159,6 +159,12 @@ int GstVideoPlayer::pullAppsinkFrame(){
         qDebug() << "format: " << gst_structure_get_string (structure, "format");
         const int format = gst_video_format_from_string(gst_structure_get_string (structure, "format"));
         qDebug() << "width: " << width << ", height: " << height << ", format: " << format;
+
+        GstVideoFormat videoFormat = gst_video_format_from_string (gst_structure_get_string (structure, "format"));
+        const GstVideoFormatInfo * videoFormatInfo = gst_video_format_get_info (videoFormat);
+        qDebug() << "pixel_stride : " << videoFormatInfo->pixel_stride ;
+
+
     }
 
     QVideoFrame* frame = getPtrFromFrameCircle();
@@ -173,6 +179,22 @@ int GstVideoPlayer::pullAppsinkFrame(){
         qCritical() << "Unable to get buffer";
         setEState(BasePlayer::Error);
         return GST_FLOW_ERROR;
+    }
+
+    GstVideoInfo* video_info = gst_video_info_new();
+    if (!gst_video_info_from_caps(video_info, caps))
+    {
+        // Could not parse video info (should not happen)
+        g_warning("Failed to parse video info");
+        return GST_FLOW_ERROR;
+    }
+
+    //https://gstreamer.freedesktop.org/documentation/video/video-frame.html?gi-language=c
+    GstVideoFrame videoFrame;
+    if(!gst_video_frame_map (&videoFrame, video_info, buf, GST_MAP_READ)) {
+        g_warning("Failed to videoFrame");
+    } else {
+//        qDebug() << videoFrame.
     }
 
     if (!gst_buffer_map(buf,&Ginfo, GST_MAP_READ)){
