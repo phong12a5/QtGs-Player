@@ -68,7 +68,7 @@ void BasePlayer::createFrameCircle(){
     QVideoFrame::PixelFormat format = m_format.pixelFormat();
     QVideoFrame* frame;
     for (int i = 0; i < 6; i++){
-        frame = new QVideoFrame(size.width()*size.height()*1.5,size,size.width(),format);
+        frame = new QVideoFrame(856*480* 1.5,size,856,format);
         m_frameCircle.append(frame);
     }
 }

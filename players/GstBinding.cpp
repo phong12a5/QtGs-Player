@@ -135,6 +135,8 @@ void GstVideoPlayer::stop(){
     emit stopped();
 }
 
+//#include <gst//gstr
+
 int GstVideoPlayer::pullAppsinkFrame(){
     GstSample *sample;
     GstBuffer *buf;
@@ -153,12 +155,16 @@ int GstVideoPlayer::pullAppsinkFrame(){
         setEState(BasePlayer::Error);
         return GST_FLOW_ERROR;
     } else {
+        g_print(gst_caps_to_string(caps));
         GstStructure *structure = gst_caps_get_structure(caps, 0);
         const int width = g_value_get_int(gst_structure_get_value(structure, "width"));
         const int height = g_value_get_int(gst_structure_get_value(structure, "height"));
+        const int bpp = g_value_get_int(gst_structure_get_value(structure, "bpp"));
+
+
         qDebug() << "format: " << gst_structure_get_string (structure, "format");
         const int format = gst_video_format_from_string(gst_structure_get_string (structure, "format"));
-        qDebug() << "width: " << width << ", height: " << height << ", format: " << format;
+        qDebug() << "width: " << width << ", height: " << height << ", bpp: " << bpp;
 
         GstVideoFormat videoFormat = gst_video_format_from_string (gst_structure_get_string (structure, "format"));
         const GstVideoFormatInfo * videoFormatInfo = gst_video_format_get_info (videoFormat);
@@ -194,8 +200,11 @@ int GstVideoPlayer::pullAppsinkFrame(){
     if(!gst_video_frame_map (&videoFrame, video_info, buf, GST_MAP_READ)) {
         g_warning("Failed to videoFrame");
     } else {
-//        qDebug() << videoFrame.
+//        guint stride = GST_VIDEO_FRAME_PLANE_STRIDE (&videoFrame, 0);
+        qDebug() << "stride: " <<  GST_VIDEO_FRAME_PLANE_STRIDE (&videoFrame, 0);
+        qDebug() << "pixel_stride: " << GST_VIDEO_FRAME_COMP_PSTRIDE (&videoFrame, 0);
     }
+
 
     if (!gst_buffer_map(buf,&Ginfo, GST_MAP_READ)){
         qCritical() << "unable to map GstBuffer";
