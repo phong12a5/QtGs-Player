@@ -53,7 +53,7 @@ PKGCONFIG += gstreamer-pbutils-1.0
 HEADERS += ./gstiface/gstiface.h \
     players/CorePlayer.h \
     players/GstBinding.h \
-    players/RawPlayer.h \
+    players/usbvideoplayer.h \
     players/videoplayer.h
 
 

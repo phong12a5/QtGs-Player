@@ -6,46 +6,46 @@
 #include <QAbstractVideoSurface>
 #include <QTimer>
 
-class reconnectTimer : public QObject
-{
+//class reconnectTimer : public QObject
+//{
 
-    Q_OBJECT
-public:
-    explicit reconnectTimer(int frameDelay, int lostConDelay, QObject* parent = nullptr):
-        QObject(parent),
-        m_frameTimer(new QTimer(this)),
-        m_restoreConnectionTimer(new QTimer(this)),
-        m_frameDelay(frameDelay),
-        m_lostConDelay(lostConDelay)
-    {
-        m_restoreConnectionTimer->setSingleShot(true);
-        connect(m_frameTimer, &QTimer::timeout, this, &reconnectTimer::reconnect);
-        connect(m_restoreConnectionTimer, &QTimer::timeout, m_frameTimer, &QTimer::stop);
-        connect(m_restoreConnectionTimer, &QTimer::timeout, this,&reconnectTimer::connectionLost);
-    }
-    ~reconnectTimer(){
+//    Q_OBJECT
+//public:
+//    explicit reconnectTimer(int frameDelay, int lostConDelay, QObject* parent = nullptr):
+//        QObject(parent),
+//        m_frameTimer(new QTimer(this)),
+//        m_restoreConnectionTimer(new QTimer(this)),
+//        m_frameDelay(frameDelay),
+//        m_lostConDelay(lostConDelay)
+//    {
+//        m_restoreConnectionTimer->setSingleShot(true);
+//        connect(m_frameTimer, &QTimer::timeout, this, &reconnectTimer::reconnect);
+//        connect(m_restoreConnectionTimer, &QTimer::timeout, m_frameTimer, &QTimer::stop);
+//        connect(m_restoreConnectionTimer, &QTimer::timeout, this,&reconnectTimer::connectionLost);
+//    }
+//    ~reconnectTimer(){
 
-    }
+//    }
 
-    void start(){
-        m_restoreConnectionTimer->start(m_lostConDelay);
-        m_frameTimer->start(m_frameDelay);
-    }
-    void stop(){
-        m_restoreConnectionTimer->stop();
-        m_frameTimer->stop();
-    }
+//    void start(){
+//        m_restoreConnectionTimer->start(m_lostConDelay);
+//        m_frameTimer->start(m_frameDelay);
+//    }
+//    void stop(){
+//        m_restoreConnectionTimer->stop();
+//        m_frameTimer->stop();
+//    }
 
-signals:
-    void reconnect();
-    void connectionLost();
+//signals:
+//    void reconnect();
+//    void connectionLost();
 
-private:
-    QTimer* m_frameTimer;
-    QTimer* m_restoreConnectionTimer;
-    int m_frameDelay;
-    int m_lostConDelay;
-};
+//private:
+//    QTimer* m_frameTimer;
+//    QTimer* m_restoreConnectionTimer;
+//    int m_frameDelay;
+//    int m_lostConDelay;
+//};
 
 
 class BasePlayer : public QObject
@@ -53,6 +53,8 @@ class BasePlayer : public QObject
     Q_OBJECT
 
     Q_PROPERTY(QAbstractVideoSurface * videoSurface READ videoSurface WRITE setVideoSurface)
+    Q_PROPERTY(int frameWidth READ frameWidth WRITE setFrameWidth NOTIFY frameWidthChanged)
+    Q_PROPERTY(int frameHeight READ frameHeight WRITE setFrameHeight NOTIFY frameHeightChanged)
 
 public:
 
@@ -71,13 +73,14 @@ public:
 
     QAbstractVideoSurface * videoSurface() const;
 
-private slots:
+    int frameWidth();
 
-    void createFrameCircle();
+    void setFrameWidth(int);
 
-protected slots:
+    int frameHeight();
 
-    QVideoFrame* getPtrFromFrameCircle();
+    void setFrameHeight(int);
+
 
 public slots:
     void setVideoSurface(QAbstractVideoSurface * surface);
@@ -96,9 +99,9 @@ signals:
 
     void errorRaised();
 
-    void reconnect();
+    void frameWidthChanged();
 
-    void connectionLost();
+    void frameHeightChanged();
 
 private:
 
@@ -112,7 +115,9 @@ private:
 
     uint8_t m_frameIndex;
 
-    reconnectTimer* m_recTimer;
+    int m_frameWidth;
+
+    int m_frameHeight;
 
 protected:
 

@@ -49,7 +49,6 @@ GstVideoPlayer::GstVideoPlayer(QObject * parent) : BasePlayer(parent),
 
     connect(this, &GstVideoPlayer::newFrame, this, &GstVideoPlayer::updateFrame);
     connect(this, &GstVideoPlayer::sourceChanged, this, &GstVideoPlayer::startByBtn);
-    connect(this, &GstVideoPlayer::reconnect, this, &GstVideoPlayer::tryToReconnect);
     connect(this, &GstVideoPlayer::startedByBtn, this, [=](){this->setEState(BasePlayer::Playing);});
 }
 GstVideoPlayer::~GstVideoPlayer(){
@@ -66,6 +65,7 @@ QString GstVideoPlayer::source() const{
 }
 
 void GstVideoPlayer::setSource(QString source){
+    qDebug() << __FUNCTION__ << ": " << source;
      if(m_source == source)
          return;
      m_source = source;
@@ -73,6 +73,7 @@ void GstVideoPlayer::setSource(QString source){
 }
 
 void GstVideoPlayer::startByBtn(){
+    qDebug() << __FUNCTION__;
     emit startedByBtn();
     start();
 }
@@ -149,43 +150,38 @@ int GstVideoPlayer::pullAppsinkFrame(){
         return GST_FLOW_ERROR;
     }
 
-    GstCaps *caps = gst_sample_get_caps(sample);
-    if(!caps) {
-        qCritical() << "Cant get caps from sample";
-        setEState(BasePlayer::Error);
-        return GST_FLOW_ERROR;
-    } else {
-        g_print(gst_caps_to_string(caps));
-        GstStructure *structure = gst_caps_get_structure(caps, 0);
-        const int width = g_value_get_int(gst_structure_get_value(structure, "width"));
-        const int height = g_value_get_int(gst_structure_get_value(structure, "height"));
-        const int bpp = g_value_get_int(gst_structure_get_value(structure, "bpp"));
-
-
-        qDebug() << "format: " << gst_structure_get_string (structure, "format");
-        const int format = gst_video_format_from_string(gst_structure_get_string (structure, "format"));
-        qDebug() << "width: " << width << ", height: " << height << ", bpp: " << bpp;
-
-        GstVideoFormat videoFormat = gst_video_format_from_string (gst_structure_get_string (structure, "format"));
-        const GstVideoFormatInfo * videoFormatInfo = gst_video_format_get_info (videoFormat);
-        qDebug() << "pixel_stride : " << videoFormatInfo->pixel_stride ;
-
-
-    }
-
-    QVideoFrame* frame = getPtrFromFrameCircle();
-    if (!frame){
-        qCritical() << "no buffers in QVideoFrame pool";
-        setEState(BasePlayer::Error);
-        return GST_FLOW_ERROR;
-    }
-
     buf = gst_sample_get_buffer(sample);
     if (!buf){
         qCritical() << "Unable to get buffer";
         setEState(BasePlayer::Error);
         return GST_FLOW_ERROR;
     }
+
+
+    if (!gst_buffer_map(buf,&Ginfo, GST_MAP_READ)){
+        qCritical() << "unable to map GstBuffer";
+        gst_sample_unref(sample);
+        setEState(BasePlayer::Error);
+        return GST_FLOW_ERROR;
+    }
+
+    GstCaps *caps = gst_sample_get_caps(sample);
+    if(!caps) {
+        qCritical() << "Cant get caps from sample";
+        setEState(BasePlayer::Error);
+        return GST_FLOW_ERROR;
+    }
+
+//    g_print(gst_caps_to_string(caps));
+    GstStructure *structure = gst_caps_get_structure(caps, 0);
+    const int width = g_value_get_int(gst_structure_get_value(structure, "width"));
+    const int height = g_value_get_int(gst_structure_get_value(structure, "height"));
+
+
+//    qDebug() << "format: " << gst_structure_get_string (structure, "format");
+//    const int format = gst_video_format_from_string(gst_structure_get_string (structure, "format"));
+    GstVideoFormat videoFormat = gst_video_format_from_string (gst_structure_get_string (structure, "format"));
+
 
     GstVideoInfo* video_info = gst_video_info_new();
     if (!gst_video_info_from_caps(video_info, caps))
@@ -199,20 +195,21 @@ int GstVideoPlayer::pullAppsinkFrame(){
     GstVideoFrame videoFrame;
     if(!gst_video_frame_map (&videoFrame, video_info, buf, GST_MAP_READ)) {
         g_warning("Failed to videoFrame");
-    } else {
-//        guint stride = GST_VIDEO_FRAME_PLANE_STRIDE (&videoFrame, 0);
-        qDebug() << "stride: " <<  GST_VIDEO_FRAME_PLANE_STRIDE (&videoFrame, 0);
-        qDebug() << "pixel_stride: " << GST_VIDEO_FRAME_COMP_PSTRIDE (&videoFrame, 0);
-    }
-
-
-    if (!gst_buffer_map(buf,&Ginfo, GST_MAP_READ)){
-        qCritical() << "unable to map GstBuffer";
-        gst_sample_unref(sample);
-        setEState(BasePlayer::Error);
         return GST_FLOW_ERROR;
     }
 
+    const int stride = GST_VIDEO_FRAME_PLANE_STRIDE (&videoFrame, 0);
+    const int  pixel_stride = GST_VIDEO_FRAME_COMP_PSTRIDE (&videoFrame, 0);
+
+//    qDebug() << "width: " << width << ", height: " << height << ", stride: " << stride << " ,pixel_stride: " << pixel_stride;
+
+
+    QVideoFrame* frame = new QVideoFrame(Ginfo.size, QSize(width, height), stride, gst_video_format_to_qvideoformat(videoFormat));//getPtrFromFrameCircle();
+    if (!frame){
+        qCritical() << "no buffers in QVideoFrame pool";
+        setEState(BasePlayer::Error);
+        return GST_FLOW_ERROR;
+    }
 
     if (frame->isMapped())
         frame->unmap();

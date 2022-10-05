@@ -4,14 +4,9 @@
 BasePlayer::BasePlayer(QObject* parent): QObject(parent),
     m_surface(nullptr),
     m_eState(BasePlayer::Stoped),
-    m_frameIndex(0),
-    m_recTimer(new reconnectTimer(10000,60000, this))
+    m_frameIndex(0)
 {
-    connect(m_recTimer, &reconnectTimer::reconnect, this, [](){qDebug() << "connection lost, reconnect called";});
-    connect(m_recTimer, &reconnectTimer::connectionLost, this, [](){qDebug() << "connection lost, no connection to device";});
 
-    connect(m_recTimer, &reconnectTimer::reconnect, this, &BasePlayer::reconnect);
-    connect(m_recTimer, &reconnectTimer::connectionLost, this, &BasePlayer::connectionLost);
 }
 
 
@@ -28,11 +23,37 @@ QAbstractVideoSurface* BasePlayer::videoSurface() const{
     return m_surface;
 }
 
+int BasePlayer::frameWidth()
+{
+    return m_frameWidth;
+}
+
+void BasePlayer::setFrameWidth(int frameWidth)
+{
+    if(m_frameWidth != frameWidth) {
+        m_frameWidth = frameWidth;
+        emit frameWidthChanged();
+    }
+}
+
+int BasePlayer::frameHeight()
+{
+    return m_frameHeight;
+}
+
+void BasePlayer::setFrameHeight(int frameHeight)
+{
+    if(m_frameHeight != frameHeight) {
+        m_frameHeight = frameHeight;
+        emit frameHeightChanged();
+    }
+}
+
 void BasePlayer::setVideoSurface(QAbstractVideoSurface* surface){
+    qDebug() << __FUNCTION__;
     if (m_surface)
         closeSurface();
     m_surface = surface;
-    m_surface->start(m_format);
 }
 
 void BasePlayer::closeSurface(){
@@ -43,9 +64,10 @@ void BasePlayer::closeSurface(){
 }
 
 void BasePlayer::setFormat(QVideoSurfaceFormat format){
-    m_format = format;
-    if(m_frameCircle.empty()) {
-        createFrameCircle();
+    if(m_format != format) {
+        m_format = format;
+        setFrameWidth(format.frameSize().width());
+        setFrameHeight(format.frameSize().height());
     }
 }
 
@@ -53,40 +75,28 @@ void BasePlayer::setEState(stateE state){
     if (m_eState == state)
         return;
     m_eState = state;
-    if (m_eState == BasePlayer::Error){
-        emit errorRaised();
-        m_recTimer->stop();
-    }
-    if (m_eState == BasePlayer::Playing){
-        m_recTimer->start();
-    }
     emit eStateChanged(m_eState);
 }
 
-void BasePlayer::createFrameCircle(){
-    QSize size = m_format.frameSize();
-    QVideoFrame::PixelFormat format = m_format.pixelFormat();
-    QVideoFrame* frame;
-    for (int i = 0; i < 6; i++){
-        frame = new QVideoFrame(856*480* 1.5,size,856,format);
-        m_frameCircle.append(frame);
-    }
-}
-
 void BasePlayer::updateFrame(QVideoFrame* frame){
+    if(!frame) return;
+    QVideoSurfaceFormat format = QVideoSurfaceFormat(frame->size(), frame->pixelFormat());
+    setFormat(format);
+
+    if(!m_surface->isActive()) {
+        m_surface->start(m_format);
+    }
+
     if (!m_surface->present(*frame)){
         m_eState = BasePlayer::Error;
     }
     else{
         m_eState = BasePlayer::Playing;
-        m_recTimer->start();
     }
-}
 
-QVideoFrame* BasePlayer::getPtrFromFrameCircle(){
-    QVideoFrame* frame = m_frameCircle[m_frameIndex];
-    m_frameIndex++;
-    if (m_frameIndex >= m_frameCircle.count())
-        m_frameIndex = 0;
-    return frame;
+    m_frameCircle.append(frame);
+    while (m_frameCircle.size() > 15) {
+        QVideoFrame* oldFrame = m_frameCircle.takeFirst();
+        delete  oldFrame;
+    }
 }

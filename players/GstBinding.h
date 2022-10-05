@@ -22,6 +22,7 @@ class GstVideoPlayer : public BasePlayer
     Q_OBJECT
 
     Q_PROPERTY(QString source READ source WRITE setSource)
+
 public:
     explicit GstVideoPlayer( QObject * parent = 0);
     ~GstVideoPlayer();

@@ -6,16 +6,16 @@
 #include "GstBinding.h"
 #include <QQuickItem>
 
-class RawPlayer : public GstVideoPlayer
+class UsbVideoPlayer : public GstVideoPlayer
 {
     Q_OBJECT
 
 public:
-    explicit RawPlayer(QObject * parent = nullptr) : GstVideoPlayer(parent)
+    explicit UsbVideoPlayer(QObject * parent = nullptr) : GstVideoPlayer(parent)
     {
         m_bpp = 2;
-        setSource("filesrc location=test-videos/sintel_trailer-480p.webm ! decodebin ! videoconvert ! appsink emit-signals=true name=sink0");
-        setFormat(QVideoSurfaceFormat(QSize(854,480), QVideoFrame::PixelFormat::Format_YUV420P, QAbstractVideoBuffer::NoHandle));
+//        setSource("filesrc location=test-videos/sintel_trailer-480p.webm ! decodebin ! videoconvert ! appsink emit-signals=true name=sink0");
+//        setFormat(QVideoSurfaceFormat(QSize(854,480), QVideoFrame::PixelFormat::Format_YUV420P, QAbstractVideoBuffer::NoHandle));
 
 //        setFormat(QVideoSurfaceFormat(QSize(576,1024), QVideoFrame::PixelFormat::Format_YUV420P, QAbstractVideoBuffer::NoHandle));
 //        setSource("filesrc location=test-videos/download.mp4 ! decodebin ! videoconvert ! appsink emit-signals=true name=sink0");
@@ -27,6 +27,10 @@ public:
 //        setFormat(QVideoSurfaceFormat(QSize(856,480), QVideoFrame::PixelFormat::Format_YUV420P, QAbstractVideoBuffer::NoHandle));
 //        setSource("playbin uri=https://www.freedesktop.org/software/gstreamer-sdk/data/media/sintel_trailer-480p.webm ! decodebin ! videoconvert ! appsink emit-signals=true name=sink0 ");
     };
+
+    Q_INVOKABLE void stopMedia() {
+        stop();
+    }
 };
 
 #endif // RAWPLAYER_H

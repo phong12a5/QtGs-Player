@@ -3,7 +3,7 @@
 #include <QQmlContext>
 
 #include <players/videoplayer.h>
-#include <players/RawPlayer.h>
+#include <players/usbvideoplayer.h>
 
 int main(int argc, char *argv[])
 {
@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    qmlRegisterType<RawPlayer>("RawPlayer",1,0,"RawPlayer");
+    qmlRegisterType<UsbVideoPlayer>("UsbVideoPlayer",1,0,"UsbVideoPlayer");
 
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
