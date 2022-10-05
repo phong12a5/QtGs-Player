@@ -37,6 +37,8 @@ public slots:
 
     void stop();
 
+    void playPause();
+
     QString source() const;
 
     void setSource(QString source);

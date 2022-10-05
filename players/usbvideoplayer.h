@@ -31,6 +31,10 @@ public:
     Q_INVOKABLE void stopMedia() {
         stop();
     }
+
+    Q_INVOKABLE void playPause() {
+        GstVideoPlayer::playPause();
+    }
 };
 
 #endif // RAWPLAYER_H

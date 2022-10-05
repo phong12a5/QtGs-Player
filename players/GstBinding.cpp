@@ -136,6 +136,23 @@ void GstVideoPlayer::stop(){
     emit stopped();
 }
 
+void GstVideoPlayer::playPause()
+{
+    GstState state;
+
+    const guint timeout = 500;    // timeout in miliseconds
+    // get the state and return it
+    gst_element_get_state(m_pipeline, &state, NULL, timeout);
+\
+    if (state == GST_STATE_PLAYING)
+      gst_element_set_state(m_pipeline, GST_STATE_PAUSED);
+
+    if (state == GST_STATE_PAUSED)
+      gst_element_set_state(m_pipeline, GST_STATE_PLAYING);
+
+    return;
+}
+
 //#include <gst//gstr
 
 int GstVideoPlayer::pullAppsinkFrame(){

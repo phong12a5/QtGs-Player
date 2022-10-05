@@ -108,5 +108,35 @@ Item {
             anchors.centerIn: parent
             fillMode: VideoOutput.Stretch
         }
+
+        Item {
+            id: pauseOverlay
+            anchors.fill: parent
+
+            Image {
+                visible: background.visible
+                anchors.centerIn: parent
+                width: 80
+                height: 80
+                source: "qrc:/images/play_icon.png"
+            }
+
+            Rectangle {
+                id: background
+                visible: false
+                opacity: 0.4
+                anchors.fill: parent
+                color: "white"
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    background.visible = !background.visible
+                    usbVideoPlayer.playPause()
+                }
+            }
+        }
+
     }
 }
